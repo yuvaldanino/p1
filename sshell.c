@@ -29,14 +29,19 @@ struct Command{
 
 
 void parseCommand(char *cmd, struct Command *command) {
+        
+        
     char *nl = strchr(cmd, '\n');
-    if (nl) *nl = '\0';
+    if (nl) {
+        *nl = '\0';
+    }
 
     char *segments[MAX_ARGS];
     int numSegments = 0;
 
     // Split the command line into segments by pipes
     char *pipeSegment = strtok(cmd, "|");
+    // if no pipe continues 
     while (pipeSegment != NULL && numSegments < MAX_ARGS) {
         segments[numSegments++] = pipeSegment;
         pipeSegment = strtok(NULL, "|");
@@ -44,6 +49,8 @@ void parseCommand(char *cmd, struct Command *command) {
 
     struct Command *currentCmd = command;
     for (int i = 0; i < numSegments; i++) {
+        
+        //intializee Command 
         currentCmd->argc = 0;
         currentCmd->redirect = 0;
         currentCmd->outfile = NULL;
@@ -77,7 +84,7 @@ void parseCommand(char *cmd, struct Command *command) {
                 }
 
                 
-                
+                //space handeling 
                 char *token = strtok(segment, " ");
                 while (token != NULL && currentCmd->argc < MAX_ARGS) {
                         currentCmd->argv[currentCmd->argc] = token;
@@ -233,7 +240,7 @@ void restoreSTDOUT(int std_out){
 
 void executePipeline(struct Command *pipeline) {
     
-    // file descriptor for pipe fd[0] and fd[1]
+    // file descriptor for pipe fd[0] R and fd[1] W 
     int fd[2];  
     // initial fd     
     int fd_in = 0;  
@@ -243,9 +250,10 @@ void executePipeline(struct Command *pipeline) {
     // as long as there is a command loops thru commands in pipeline 
     while (currentCmd != NULL) {
         // if not last command in pipeline 
-        // create another pipe
+        
         if (currentCmd->next) {
-               
+                
+                // create another pipe
             if (pipe(fd) < 0) {
                  // if pipe error 
                 perror("pipe");
@@ -263,6 +271,18 @@ void executePipeline(struct Command *pipeline) {
                 dup2(fd_in, STDIN_FILENO);  
                 close(fd_in);
             }
+            
+            // when last operan has redirect 
+            if (!currentCmd->next && currentCmd->redirect){
+                int out_fd = open(currentCmd->outfile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+                if (out_fd < 0) {
+                        perror("open");
+                        exit(EXIT_FAILURE);
+                }
+                dup2(out_fd, STDOUT_FILENO);
+                close(out_fd);
+            }
+            
             // if not last command 
             if (currentCmd->next) {
                 // Close the read  of the current pipe
