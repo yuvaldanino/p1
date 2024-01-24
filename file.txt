@@ -1,4 +1,217 @@
-#include <stdio.h>
+void parseCommand(char *cmd, struct Command *command) {
+    char *nl = strchr(cmd, '\n');
+    if (nl) {
+        *nl = '\0';
+    }
+
+    // array to store segment s
+    char *segments[MAX_ARGS]; 
+    int numSegments = 0;
+
+
+
+    //occurance of | gets first seg before pipe
+    char *pipeSegment = strtok(cmd, "|");
+    printf("Processing segment: '%s'\n", pipeSegment);
+    while (pipeSegment != NULL && numSegments < MAX_ARGS) {
+        segments[numSegments++] = pipeSegment;
+        pipeSegment = strtok(NULL, "|");
+    }
+
+    for (int i = 0; i < numSegments; i++) {
+        command->argc = 0;
+        command->redirect = 0;
+        command->outfile = NULL;
+        command->next = NULL;
+    
+    
+    
+    }
+
+
+
+    //stores parsed info of first cmd 
+    struct Command *currentCmd = command;
+
+
+        // loop that keep runnig as long as we have pipes 
+        while(pipeSegment != NULL){
+                //intializee Command 
+                currentCmd->argc = 0;
+                currentCmd->redirect = 0;
+                currentCmd->outfile = NULL;
+                currentCmd->next = NULL;
+
+
+                //check for redirects 
+                char *redirectSymb = strchr(pipeSegment, '>');
+                // if we have redirecy symbol
+                if(redirectSymb){
+                        //idea: split at redirect, assign command-> outfile and deleted spaces 
+
+                        //point to > and swictch it to null terminator
+                        *redirectSymb = '\0';
+
+                        //assign command-> file to actual file which is 1 over > location 
+                        currentCmd->outfile = redirectSymb + 1;
+
+                        // indicate a redirect occured 
+                        currentCmd->redirect = 1;
+
+                        //to handel weird spaces moves file pointer after spaces 
+                        while(*currentCmd->outfile == ' '){
+                                currentCmd->outfile++;
+                        }
+
+
+                        //printf("file: %s ", command->outfile);
+
+                }
+
+                 // Print redirection information, if any
+                if (currentCmd->redirect) {
+                        printf("Redirect to: '%s'\n", currentCmd->outfile);
+                }
+                
+                char *token = strtok(cmd, " ");
+                while (token != NULL && currentCmd->argc < MAX_ARGS) {
+                        currentCmd->argv[currentCmd->argc] = token;
+                        
+                        // Print each argument for debugging
+                        //printf("Argument[%d]: %s\n", command->argc, command->argv[command->argc]);
+
+                        currentCmd->argc++;
+                        
+                        token = strtok(NULL, " ");
+                }
+                currentCmd->argv[currentCmd->argc] = NULL;
+
+
+                //check to see if there is another pipe seg
+                pipeSegment = strtok(NULL, "|");
+                printf("Processing next segment: '%s'\n", pipeSegment);
+
+                // if there no more deg ( pipeSef is NULL)
+                if(!pipeSegment){
+                        //break loop beacuse we only need to run this many commands 
+                        printf("no pipes");
+
+                        break;
+                }
+                // Print a marker for a pipeline
+                printf("Pipeline to next command\n");
+
+                //if there is still another pipe
+                // update curr pipe  to prepare for next pipe
+                //allocate  mem for new command to store next seg info
+                currentCmd->next = (struct Command *)malloc(sizeof(struct Command));
+                currentCmd = currentCmd->next;
+
+        }       
+    
+
+}
+
+
+
+
+
+
+
+
+
+
+
+//stores parsed info of first cmd 
+    struct Command *currentCmd = command;
+
+
+        // loop that keep runnig as long as we have pipes 
+        while(pipeSegment != NULL){
+                //intializee Command 
+                currentCmd->argc = 0;
+                currentCmd->redirect = 0;
+                currentCmd->outfile = NULL;
+                currentCmd->next = NULL;
+
+
+                //check for redirects 
+                char *redirectSymb = strchr(pipeSegment, '>');
+                // if we have redirecy symbol
+                if(redirectSymb){
+                        //idea: split at redirect, assign command-> outfile and deleted spaces 
+
+                        //point to > and swictch it to null terminator
+                        *redirectSymb = '\0';
+
+                        //assign command-> file to actual file which is 1 over > location 
+                        currentCmd->outfile = redirectSymb + 1;
+
+                        // indicate a redirect occured 
+                        currentCmd->redirect = 1;
+
+                        //to handel weird spaces moves file pointer after spaces 
+                        while(*currentCmd->outfile == ' '){
+                                currentCmd->outfile++;
+                        }
+
+
+                        //printf("file: %s ", command->outfile);
+
+                }
+
+                 // Print redirection information, if any
+                if (currentCmd->redirect) {
+                        printf("Redirect to: '%s'\n", currentCmd->outfile);
+                }
+                
+                char *token = strtok(cmd, " ");
+                while (token != NULL && currentCmd->argc < MAX_ARGS) {
+                        currentCmd->argv[currentCmd->argc] = token;
+                        
+                        // Print each argument for debugging
+                        //printf("Argument[%d]: %s\n", command->argc, command->argv[command->argc]);
+
+                        currentCmd->argc++;
+                        
+                        token = strtok(NULL, " ");
+                }
+                currentCmd->argv[currentCmd->argc] = NULL;
+
+
+                //check to see if there is another pipe seg
+                pipeSegment = strtok(NULL, "|");
+                printf("Processing next segment: '%s'\n", pipeSegment);
+
+                // if there no more deg ( pipeSef is NULL)
+                if(!pipeSegment){
+                        //break loop beacuse we only need to run this many commands 
+                        printf("no pipes");
+
+                        break;
+                }
+                // Print a marker for a pipeline
+                printf("Pipeline to next command\n");
+
+                //if there is still another pipe
+                // update curr pipe  to prepare for next pipe
+                //allocate  mem for new command to store next seg info
+                currentCmd->next = (struct Command *)malloc(sizeof(struct Command));
+                currentCmd = currentCmd->next;
+
+        }  
+
+
+
+
+
+
+
+
+
+
+
+        #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -29,29 +242,36 @@ struct Command{
 
 void parseCommand(char *cmd, struct Command *command) {
     char *nl = strchr(cmd, '\n');
-    if (nl) *nl = '\0';
+    if (nl) {
+        *nl = '\0';
+    }
 
-    char *segments[MAX_ARGS];
+    // array to store segment s
+    char *segments[MAX_ARGS]; 
     int numSegments = 0;
 
-    // Split the command line into segments by pipes
+
+
+    //occurance of | gets first seg before pipe
     char *pipeSegment = strtok(cmd, "|");
+    printf("Processing segment: '%s'\n", pipeSegment);
     while (pipeSegment != NULL && numSegments < MAX_ARGS) {
         segments[numSegments++] = pipeSegment;
         pipeSegment = strtok(NULL, "|");
     }
-
+    
     struct Command *currentCmd = command;
+
     for (int i = 0; i < numSegments; i++) {
         currentCmd->argc = 0;
         currentCmd->redirect = 0;
         currentCmd->outfile = NULL;
         currentCmd->next = NULL;
-
-        // Process each segment separately
+        
         char *segment = segments[i];
-                //check for redirects 
-                char *redirectSymb = strchr(segment, '>');
+
+        //check for redirects 
+                char *redirectSymb = strchr(pipeSegment, '>');
                 // if we have redirecy symbol
                 if(redirectSymb){
                         //idea: split at redirect, assign command-> outfile and deleted spaces 
@@ -75,9 +295,12 @@ void parseCommand(char *cmd, struct Command *command) {
 
                 }
 
+                // Print redirection information, if any
+                if (currentCmd->redirect) {
+                        printf("Redirect to: '%s'\n", currentCmd->outfile);
+                }
                 
-                
-                char *token = strtok(segment, " ");
+                char *token = strtok(cmd, " ");
                 while (token != NULL && currentCmd->argc < MAX_ARGS) {
                         currentCmd->argv[currentCmd->argc] = token;
                         
@@ -90,30 +313,25 @@ void parseCommand(char *cmd, struct Command *command) {
                 }
                 currentCmd->argv[currentCmd->argc] = NULL;
 
+                // Debug print
+                printf("Command %d: ", i + 1);
+                for (int j = 0; j < currentCmd->argc; j++) {
+                        printf("%s ", currentCmd->argv[j]);
+                }
+                printf("\n");
 
-
-        // Debug print
-        printf("Command %d: ", i + 1);
-        for (int j = 0; j < currentCmd->argc; j++) {
-            printf("%s ", currentCmd->argv[j]);
-        }
-        printf("\n");
-
-
-         // Print redirection information, if any
-        if (currentCmd->redirect) {
-                printf("Redirect to: '%s'\n", currentCmd->outfile);
-        }
-
-        // Prepare for the next command in the pipeline
-        if (i < numSegments - 1) {
-            currentCmd->next = (struct Command *)malloc(sizeof(struct Command));
-            currentCmd = currentCmd->next;
-        }
-
-
-
+                if (i < numSegments - 1) {
+                        currentCmd->next = (struct Command *)malloc(sizeof(struct Command));
+                        currentCmd = currentCmd->next;
+                }
+    
+    
     }
+
+
+         
+    
+
 }
 
 void executeCommand(struct Command *command) {
@@ -230,78 +448,6 @@ void restoreSTDOUT(int std_out){
 }
 
 
-void executePipeline(struct Command *pipeline) {
-    
-    // file descriptor for pipe fd[0] and fd[1]
-    int fd[2];  
-    // initial fd     
-    int fd_in = 0;  
-    //cuurent command in pipline 
-    struct Command *currentCmd = pipeline;
-
-    // as long as there is a command loops thru commands in pipeline 
-    while (currentCmd != NULL) {
-        // if not last command in pipeline 
-        // create another pipe
-        if (currentCmd->next) {
-               
-            if (pipe(fd) < 0) {
-                 // if pipe error 
-                perror("pipe");
-                exit(EXIT_FAILURE);
-            }
-        }
-
-        // new command indicates new process 
-        pid_t pid = fork();
-
-        // Child process
-        if (pid == 0) {  
-            if (fd_in != 0) {
-                //curr command reads input from prev command 
-                dup2(fd_in, STDIN_FILENO);  
-                close(fd_in);
-            }
-            // if not last command 
-            if (currentCmd->next) {
-                // Close the read  of the current pipe
-                close(fd[0]);  
-                // Set up output to the next pipe
-                dup2(fd[1], STDOUT_FILENO);  
-                close(fd[1]);
-            }
-
-            // Execute the command
-            execvp(currentCmd->argv[0], currentCmd->argv);  
-            // reaches here only if error 
-            perror("execvp");  
-            exit(EXIT_FAILURE);
-        } // fork error 
-        else if (pid < 0) {
-            perror("fork");
-            exit(EXIT_FAILURE);
-        }
-
-        // closes unused file descriptors 
-        if (fd_in != 0) {
-            close(fd_in);
-        }
-
-        if (currentCmd->next) {
-            // Close the write end of the current pipe
-            close(fd[1]);  
-            // Save the read end for the next command
-            fd_in = fd[0];  
-        }
-
-        currentCmd = currentCmd->next;
-    }
-
-    // Wait for all child processes to finish
-    while (wait(NULL) > 0);
-}
-
-
 
 int main(void){
         char cmd[CMDLINE_MAX]; 
@@ -334,9 +480,7 @@ int main(void){
                 if (keepGoing){
                         
                         if(command.next != NULL){
-                                printf("executePipeline \n ");
-
-                                executePipeline(&command);
+                                //executePipeline(&command);
                         
                         // if a redirect flag was signaled
                         }else if(command.redirect){
