@@ -192,8 +192,8 @@ void handleBuiltInCommands(struct Command *command, int *shouldContinue) {
                         perror("chdir");
                       }  
                 }else{
-                        // no arguments for cd 
-                      fprintf(stderr, "cd: missing argument\n");  
+                         // no arguments for cd 
+                      fprintf(stderr, "cd: missing argument\n");   
                 }
         }
 }
@@ -322,6 +322,25 @@ void executePipeline(struct Command *pipeline) {
     while (wait(NULL) > 0);
 }
 
+int isBuiltInCommand(struct Command *command) {
+    
+    if (command == NULL || command->argc == 0) {
+        return 0; // If command is NULL or has no arguments, it's not a built-in command
+    }
+
+    // Check if the command is one of the built-in commands
+    if (strcmp(command->argv[0], "exit") == 0) {
+        return 1; // If the command is "exit", return true
+    } else if (strcmp(command->argv[0], "pwd") == 0) {
+        return 1; // If the command is "pwd", return true
+    } else if (strcmp(command->argv[0], "cd") == 0) {
+        return 1; // If the command is "cd", return true
+    }
+
+    return 0; // If none of the above, return false
+}
+
+
 
 
 int main(void){
@@ -347,13 +366,15 @@ int main(void){
                 //check if we need redirection 
 
                 // handle the built in commands exit, pwd, cd 
-                handleBuiltInCommands(&command, &keepGoing);
+                //handleBuiltInCommands(&command, &keepGoing);
 
-                
+                // Check if it's a built-in command
+                if(isBuiltInCommand(&command)) {  
+                        handleBuiltInCommands(&command, &keepGoing);
 
-                // execute commands 
-                if (keepGoing){
-                        
+                // execute no built in commands 
+                }else{
+                        // if there is a next command meaning its a pipe 
                         if(command.next != NULL){
                                 printf("executePipeline \n ");
 
