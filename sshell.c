@@ -8,6 +8,7 @@
 
 #define CMDLINE_MAX 512
 #define MAX_ARGS 10
+#define PATH_MAX 4096
 
 
 //include for syscall functions 
