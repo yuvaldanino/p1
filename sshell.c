@@ -327,12 +327,13 @@ void handleRedirection(struct Command *command, int *std_out){
         // trimWhiteSaces ensures the pricesses file is clean 
         char* trimmedFilename = trimWhitespace(command->outfile);
 
-        
-        if (command->redirect == 2) {  // Append mode
+        // Append mode
+        if (command->redirect == 2) {  
                 fd = open(trimmedFilename, O_WRONLY | O_CREAT | O_APPEND, 0644);
                 //test print
                 //fprintf(stderr, "append mode, fd: %d\n", fd);
-        } else {  // Standard redirection (overwrite mode)
+        } // Standard redirection 
+        else {  
                 fd = open(trimmedFilename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
         }
 
@@ -345,7 +346,6 @@ void handleRedirection(struct Command *command, int *std_out){
 
 
         //in order to restore stdout -> save where stdout is directed to 
-        // dup = duplicate 
         *std_out = dup(STDOUT_FILENO);
         //if no location (error)
         if(*std_out == -1){
@@ -442,12 +442,15 @@ void executePipeline(struct Command *pipeline, char *fullCMD) {
                 // same logic as my redirect function 
                 
                 int out_fd;
-                
-                if (currentCmd->redirect == 2) {  // Append mode
+
+                // Append mode
+                if (currentCmd->redirect == 2) {  
                         out_fd = open(currentCmd->outfile, O_WRONLY | O_CREAT | O_APPEND, 0644);
                         //test print
                         //fprintf(stderr, "append mode, fd: %d\n", fd);
-                } else {  // Standard redirection (overwrite mode)
+                } 
+                // Standard redirection 
+                else {  
                         out_fd = open(currentCmd->outfile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
                 }
 
@@ -529,7 +532,7 @@ void executePipeline(struct Command *pipeline, char *fullCMD) {
         waitpid(processInfo[i].pid, &status, 0);
 
         //debug statemnt
-        //printf("]Command '%s' with PID %d exited with status %d\n", processInfo[i].commandString, processInfo[i].pid, status);
+        //printf("]Command '%s' with PID %d  with status %d\n", processInfo[i].commandString, processInfo[i].pid, status);
 
         // Append each process's status to the completion message
         char statusPart[50];
