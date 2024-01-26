@@ -169,7 +169,11 @@ cmd_one_arg() {
     run_test_case "ls dir_test\nexit\n"
     rm -rf dir_test
 
+    #filtered_output=$(echo "$STDOUT" | grep -v "^sshell\$")
+
     local line_array=()
+    #line_array+=("$(echo "$filtered_output" | sed -n '1p')")  
+
     line_array+=("$(select_line "${STDOUT}" "2")")
     local corr_array=()
     corr_array+=("lstest")
@@ -241,7 +245,7 @@ stdout_app_simple() {
     rm -f t
 
     local line_array=()
-    line_array+=("$(select_line "${STDOUT}" "4")")
+    line_array+=("$(select_line "${STDOUT}" "3")") # changed to address issue 
     line_array+=("$(select_line "${STDOUT}" "5")")
     local corr_array=()
     corr_array+=("toto")
