@@ -1,4 +1,4 @@
-# ECS 150: Simple Shell (sshell)
+# ECS 150: Shell (sshell)
 
 ## Project Overview
 
